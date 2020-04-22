@@ -1,7 +1,6 @@
 import numpy as np
 import librosa, librosa.display
 import matplotlib.pyplot as plt
-%matplotlib inline
 import os, numpy, scipy, matplotlib.pyplot as plt, IPython.display as ipd
 from IPython.display import Audio
 import pandas as pd
@@ -23,9 +22,10 @@ def load(indir=None,outdir=None):
     df = pd.DataFrame({'Name': song_name,
                        'y': y_array,
                        'sr': sr_array})
+    print(type(df))
     df.to_pickle(os.path.join(outdir,r'loaded_data.pkl'))
 
-    return df
+    return None
 
 
 def compute_pitch(chromagram):
@@ -112,7 +112,7 @@ def get_clean_data(df):
             
     newdf = pd.DataFrame(dfdict)
     
-    return None
+    return newdf
 
 
 
@@ -125,5 +125,5 @@ def clean_data(indir = None, outdir = None):
    
     cleaned.to_pickle(os.path.join(outdir,r'cleaned_data.pkl'))
     
-    return cleaned
+    return None
 

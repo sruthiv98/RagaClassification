@@ -36,18 +36,18 @@ def main(targets):
     # make the data target
     if 'data' in targets:
         cfg = load_params(DATA_PARAMS)
-        [_ for _ in load(**cfg)]
+        load(**cfg)
 
         cfg = load_params(CLEAN_PARAMS)
-        [_ for _ in clean_data(**cfg)]
+        clean_data(**cfg)
 
     # make the test target
     if 'test' in targets:
         cfg = load_params(TEST_DATA_PARAMS)
-        [_ for _ in load(**cfg)]
+        load(**cfg)
 
         cfg = load_params(TEST_CLEAN_PARAMS)
-        [_ for _ in clean_data(**cfg)]
+        clean_data(**cfg)
 
     if 'model' in targets:
         #cfg = load_params(MODEL_PARAMS)
