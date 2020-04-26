@@ -5,7 +5,7 @@ import json
 import shutil
 
 sys.path.insert(0, 'src') # add library code to path
-from etl import load, clean_data #, compute_pitch (do not know if needed)
+from etl import load, clean_data 
 #from model import driver
 
 

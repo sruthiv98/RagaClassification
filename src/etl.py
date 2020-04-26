@@ -1,10 +1,10 @@
 import numpy as np
 import librosa, librosa.display
 import matplotlib.pyplot as plt
-import os, numpy, scipy, matplotlib.pyplot as plt, IPython.display as ipd
-from IPython.display import Audio
+import os, numpy, scipy, statistics, matplotlib.pyplot as plt
 import pandas as pd
-
+from scipy.stats import mode
+import json
 
 
 def load(indir=None,outdir=None): 
@@ -27,24 +27,13 @@ def load(indir=None,outdir=None):
     return None
 
 
-def compute_pitch(chromagram):
-    total_occurences_above_8 = []
-    notes = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
 
-    for i in chromagram: 
-        count = 0
-        for j in i: 
-            if j >=0.7: 
-                count+=1
-        total_occurences_above_8.append(count)
-        
-    df = pd.DataFrame({'occurences above 0.8':total_occurences_above_8,'notes':notes})
-    df = df.sort_values('occurences above 0.8',ascending=False)
-    pitch = df.iloc[0]['notes']
-        
-    return pitch
+def clean_data(indir = None, outdir = None):
 
-def get_clean_data(df):
+    if outdir and not os.path.exists(outdir):
+        os.makedirs(outdir)
+    df = pd.read_pickle(indir+'/loaded_data.pkl')
+
     dfdict = {'songs': [], 'y': [], 'sr': []}
     fmin = librosa.midi_to_hz(36)
     hop_length = 512
@@ -53,18 +42,30 @@ def get_clean_data(df):
     ys = np.asarray(list(df['y']))
     srs = list(df['sr'])
     
+    pitchdict = {'Asavari Natabhairavi 1': 'C#', 'Asavari Natabhairavi 2': 'D',
+                 'Asavari Natabhairavi 3': 'D',
+               'Bhairav Mayamalavagowlai 1': 'C#', 'Bhairav Mayamalavagowlai 2': 'C', 
+               'Bhairav Mayamalavagowlai 3': 'C#', 'Bhairavi Hanumatodi 1': 'D',
+               'Bhairavi Hanumatodi 2': 'C', 'Bhairavi Hanumatodi 3': 'D#',
+               'Bilawal Dheerashankarabharanam 1': 'D', 'Bilawal Dheerashankarabharanam 2': 'D#',
+               'Bilawal Dheerashankarabharanam 3': 'E', 'Kafi Karaharapriya 1': 'D',
+               'Kafi Karaharapriya 2': 'D', 'Kafi Karaharapriya 3': 'D#',
+               "Kalyan Kalyani 1": 'E', "Kalyan Kalyani 2": 'D#', 'Kalyan Kalyani 3': 'D#',
+               'Khamaj Harikambhoji 1': 'D', 'Khamaj Harikambhoji 2': 'E', 'Khamaj Harikambhoji 3': 'E',
+               'Marva Gamanasharma 1': 'C', 'Marva Gamanasharma 2': 'E', 'Marva Gamanasharma 3': 'D',
+               'Poorvi Kamavardhani 1': 'C#', 'Poorvi Kamavardhani 2': 'C#', 'Poorvi Kamavardhani 3': 'C#',
+               'Todi Subhapantuvarali 1': 'C', 'Todi Subhapantuvarali 2': 'C#', 'Todi Subhapantuvarali 3': 'D'}
+    
     #iterate through input dict
     for i in range(len(df)):
         y = ys[i]
         sr = srs[i]
         
-        #check pitch of each input
-        chromagram = librosa.feature.chroma_stft(y, sr=sr, hop_length=hop_length)
-        
-        pitch = compute_pitch(chromagram)
+        #check pitch of each input        
+        pitch = pitchdict[audio[i][:-4]]
         
         if pitch == 'C':
-            continue
+            newy = y
         elif pitch == 'C#':
             newy = librosa.effects.pitch_shift(y, sr, n_steps=-1)
         elif pitch == 'D':
@@ -88,15 +89,16 @@ def get_clean_data(df):
         elif pitch == 'B':
             newy = librosa.effects.pitch_shift(y, sr, n_steps=+1)
         
-        y = newy  
+        y = newy
         ylist = []
+    
         first = 0
-        second = 500000
+        second = 100000
         while second < len(y):
             ylist.append(y[first:second])
             first = second
-            second = second + 500000
-            
+            second = second + 100000
+
         cliptitles = []
         
         for j in range(len(ylist)):
@@ -106,93 +108,12 @@ def get_clean_data(df):
         for k in range(len(cliptitles)):
             dfdict['songs'].append(cliptitles[k])
             dfdict['y'].append(ylist[k])
-            #assuming sr does not change?
-            dfdict['sr'].append(sr)
-            
-    newdf = pd.DataFrame(dfdict)
-    
-    return newdf
 
-
-
-def clean_data(indir = None, outdir = None):
-
-    if outdir and not os.path.exists(outdir):
-        os.makedirs(outdir)
-    df = pd.read_pickle('data/loaded_data.pkl')
-    
-    
-    dfdict = {'songs': [], 'y': [], 'sr': []}
-    fmin = librosa.midi_to_hz(36)
-    hop_length = 512
-    
-    audio = list(df['Name'])
-    ys = df['y']
-    newys = [i for i in ys]
-    ys = newys
-    srs = list(df['sr'])
-    
-    #iterate through input dict
-    for i in range(len(df)):
-        y = ys[i]
-        sr = srs[i]
-        
-        #check pitch of each input
-        chromagram = librosa.feature.chroma_stft(y, sr=sr, hop_length=hop_length)
-        
-        pitch = compute_pitch(chromagram)
-        
-        if pitch == 'C':
-            continue
-        elif pitch == 'C#':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=-1)
-        elif pitch == 'D':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=-2)
-        elif pitch == 'D#':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=-3)
-        elif pitch == 'E':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=-4)
-        elif pitch == 'F':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=-5)
-        elif pitch == 'F#':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=-6)
-        elif pitch == 'G':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=-7)
-        elif pitch == 'G#':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=+4)
-        elif pitch == 'A':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=+3)
-        elif pitch == 'A#':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=+2)
-        elif pitch == 'B':
-            newy = librosa.effects.pitch_shift(y, sr, n_steps=+1)
-        
-        y = newy 
-        ylist = []
-        first = 0
-        second = 50000
-        print(len(y))
-        while second < len(y):
-            ylist.append(y[first:second])
-            first = second
-            second = second + 50000
-        cliptitles = []
-        
-        for j in range(len(ylist)):
-            string = audio[i][:-6]
-            cliptitles.append(string)
-            
-        for k in range(len(cliptitles)):
-            dfdict['songs'].append(cliptitles[k])
-            dfdict['y'].append(ylist[k])
-            #assuming sr does not change?
             dfdict['sr'].append(sr)
             
     cleaned = pd.DataFrame(dfdict)
-    
-    #cleaned = get_clean_data(df)
    
-    cleaned.to_pickle(os.path.join(outdir,r'cleaned_data.pkl'))
+    cleaned.to_pickle(os.path.join(outdir,'cleaned_data.pkl'))
     
-    return 
+    return cleaned
 
