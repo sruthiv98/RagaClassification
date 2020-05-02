@@ -93,11 +93,11 @@ def clean_data(indir = None, outdir = None):
         ylist = []
     
         first = 0
-        second = 100000
+        second = 10000
         while second < len(y):
             ylist.append(y[first:second])
             first = second
-            second = second + 100000
+            second = second + 10000
 
         cliptitles = []
         

@@ -6,46 +6,39 @@ def frequency_counts(df):
     y_list = df['y'] #ys for every clip
     sr_list = df['sr']
     hop_length = 512
-    notes = {'C': [],'C#': [],'D': [],'D#': [],'E': [],'F': [],'F#': [],'G': [],'G#': [],'A': [],'A#': [],'B': []}
-    
+    notes = {'C': 0,'C#': 0,'D': 0,'D#': 0,'E': 0,'F': 0,'F#': 0,'G': 0,'G#': 0,'A': 0,'A#': 0,'B': 0}
+    global_notecount = 0 
     #goes through all clips
     for i in range(len(y_list)): 
+        
         chromagram = librosa.feature.chroma_stft(y = y_list[i], sr=sr_list[i], hop_length=hop_length)
         
         notecount = 0 #total number of notes we are getting from clip
         counts = [] #final length should be 12
+     
+        seq_notes = []
+        #go through each 1/43rd of a second 
+        for row in chromagram.T:
+            seq_notes.append(np.argmax(row)) #index of note with highest frequency at that 1/43rd of a second
+        all_notes = pd.Series(seq_notes).apply(numtonote)
+    
+        values = []
+        for i in range(0, len(all_notes),86):
+            curr = all_notes[i:i+86]
+            values.append(mode(curr)[0][0])
+        notecount = len(values)
+        global_notecount += notecount
         
-        #goes through each of 12 arrays (notes) in chromagram 
-        for note in range(len(chromagram)): 
-            count = 0 #count for specific note in clip
-            
-            #goes through each note array in chromagram 
-            for j in chromagram[note]:
-                
-                #minimum "loudness" that would qualify as a correct note
-                if j >=0.9:
-                    
-                    #add to count of specific note in clip
-                    count+=1
-                    
-                    #add to count of total notes in clip
-                    notecount += 1
-            counts.append(count)
+        #add notecount to global dictionary directly
+        for i in values:   
+            if i in notes:
+                notes[i]+=1
+            else: 
+                notes[i] = 1
         
-        #going through counts of each note in clip
-        for j in range(len(counts)):
-            counts[j] = counts[j]/notecount
-        
-        #going through global note count dictionary
-        for n in range(len(notes)):
-            note = list(notes)
-            #adds each note's frequency in this clip to global dictionary
-            notes[note[n]].append(counts[n])
-            
-    for note in notes:
+           for note in notes:
         #takes average frequency for each note
-        notes[note] = np.mean(notes[note])
-        
+        notes[note] = notes[note]/global_notecount
         
     notedf = pd.DataFrame.from_dict(notes, orient = 'index')
     return notedf
