@@ -1,4 +1,4 @@
 {
-    "indir": "data", 
-    "outdir": "data"
+    "indir": "data/loaded", 
+    "outdir": "data/cleaned"
 } 

@@ -1,0 +1,4 @@
+{
+    "indir": "test/cleaned", 
+    "outdir": "test/features"
+} 

@@ -22,6 +22,9 @@ def load(indir=None,outdir=None):
     df = pd.DataFrame({'Name': song_name,
                        'y': y_array,
                        'sr': sr_array})
+    if outdir and not os.path.exists(outdir):
+        os.makedirs(outdir)
+        
     df.to_pickle(os.path.join(outdir,r'loaded_data.pkl'))
 
     return None
@@ -34,7 +37,7 @@ def clean_data(indir = None, outdir = None):
         os.makedirs(outdir)
     df = pd.read_pickle(indir+'/loaded_data.pkl')
 
-    dfdict = {'songs': [], 'y': [], 'sr': []}
+    dfdict = {'Name': [], 'y': [], 'sr': []}
     fmin = librosa.midi_to_hz(36)
     hop_length = 512
     
@@ -93,11 +96,11 @@ def clean_data(indir = None, outdir = None):
         ylist = []
     
         first = 0
-        second = 10000
+        second = 100000
         while second < len(y):
             ylist.append(y[first:second])
             first = second
-            second = second + 10000
+            second = second + 100000
 
         cliptitles = []
         
@@ -106,12 +109,15 @@ def clean_data(indir = None, outdir = None):
             cliptitles.append(string)
             
         for k in range(len(cliptitles)):
-            dfdict['songs'].append(cliptitles[k])
+            dfdict['Name'].append(cliptitles[k])
             dfdict['y'].append(ylist[k])
 
             dfdict['sr'].append(sr)
             
     cleaned = pd.DataFrame(dfdict)
+    
+    if outdir and not os.path.exists(outdir):
+        os.makedirs(outdir)
    
     cleaned.to_pickle(os.path.join(outdir,'cleaned_data.pkl'))
     

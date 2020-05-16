@@ -6,15 +6,18 @@ import shutil
 
 sys.path.insert(0, 'src') # add library code to path
 from etl import load, clean_data 
-#from model import driver
-
+from model import driver
+from features import make_features
 
 DATA_PARAMS = 'config/01-data.json'
 CLEAN_PARAMS = 'config/02-clean.json'
-MODEL_PARAMS = 'config/03-model.json'
+FEATURE_PARAMS = 'config/03-features.json'
+MODEL_PARAMS = 'config/04-model.json'
 
 TEST_DATA_PARAMS = 'config/test-01-data.json'
 TEST_CLEAN_PARAMS = 'config/test-02-clean.json'
+TEST_FEATURE_PARAMS = 'config/test-03-features.json'
+TEST_MODEL_PARAMS = 'config/test-04-model.json'
 
 
 def load_params(fp):
@@ -49,10 +52,15 @@ def main(targets):
         cfg = load_params(TEST_CLEAN_PARAMS)
         clean_data(**cfg)
 
+        cfg = load_params(TEST_FEATURE_PARAMS)
+        make_features(**cfg)
+
     if 'model' in targets:
-        #cfg = load_params(MODEL_PARAMS)
-        #driver(**cfg)
-        print('working on it')
+        print('about to load model')
+        cfg = load_params(TEST_MODEL_PARAMS)
+        print('model loded')
+        driver(**cfg)
+        print('done')
 
     return
 

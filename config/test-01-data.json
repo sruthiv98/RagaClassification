@@ -1,4 +1,4 @@
 {
     "indir": "test/testdata_raw",
-    "outdir": "test"
+    "outdir": "test/loaded"
 }
