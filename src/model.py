@@ -1,3 +1,4 @@
+#import packages and dependencies 
 import os
 import pandas as pd
 from joblib import dump
@@ -17,6 +18,11 @@ LABEL = 'Name'
 
 
 def data_loader(indir, traincols=TRAINCOLS, label=LABEL):
+    '''
+    One-hot-encodes the pitches, multiplies one-hot column with occurence to provide more nuiance with
+    the presence of an note
+    Returns a dataframe with features (X) -> the multiplied list of lists, and the labels (y) -> raga name
+    '''
 
     mlb = MultiLabelBinarizer()
     df = pd.read_pickle(indir+'/feature_data.pkl')
@@ -57,13 +63,18 @@ def data_loader(indir, traincols=TRAINCOLS, label=LABEL):
     
     X = df[traincols]
     y_value = df[label]
+    
     return X,y_value
 
 
 def train_model(X, y, outdir=None):
+    '''
+    Inputs features & labels, and trains/outputs model
+    '''
     model = GaussianNB()
     model.fit(list(X['multiplied list']), y)
 
+    #creates directory & dumps model 
     if outdir:
         t = int(time.time())
         joblib.dump(model, os.path.join(outdir, 'naivebayes-model-%d.joblib' % t))
@@ -72,6 +83,10 @@ def train_model(X, y, outdir=None):
 
 
 def driver(indir, outdir=None):
+    '''
+    Runs all functions
+    Inputs dataframe with features and outputs a model to specified directories 
+    '''
 
     if outdir and not os.path.exists(outdir):
         os.makedirs(outdir)

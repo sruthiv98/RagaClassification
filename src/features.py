@@ -1,3 +1,4 @@
+#import packages and libraries  
 import numpy as np
 import librosa, librosa.display
 import matplotlib.pyplot as plt
@@ -11,6 +12,10 @@ from nltk.util import ngrams
 
 
 def numtonote(num):
+    '''
+    Maps the array number to a note
+    return: the pitch as a string
+    '''
     if num == 0:
         return 'C'
     if num == 1:
@@ -38,7 +43,8 @@ def numtonote(num):
     
 def average_dist(df):
     '''
-    Returns the top 7 notes, the frequency of their occurences   
+    average_dist(df) takes in a cleaned DataFrame 
+    Returns the top 7 notes, the frequency of their occurences    
     '''
     y_list = df['y'] #ys for every clip
     sr_list = df['sr']
@@ -68,7 +74,8 @@ def average_dist(df):
             curr = clipped_notes[i:i+43]
             values.append(mode(curr)[0][0])
         notecount = len(values)
-        
+
+        #adds to local dictionary 
         for i in values:   
             if i in notes:
                 notes[i]+=1
@@ -78,6 +85,7 @@ def average_dist(df):
         for note in notes:
             notes[note] = notes[note]/notecount
         
+        #gets top 7 notes & their frequencies 
         notedf = pd.DataFrame.from_dict(notes, orient = 'index')
         frequencies, notes = top_7_notes(notedf)
         all_frequencies.append(frequencies)
@@ -86,17 +94,27 @@ def average_dist(df):
     return [all_frequencies, all_notes]
 
 def top_7_notes(df):
+    '''
+    Takes in a Dataframe of notes and their frequencies
+    Returns a list of the top 7 frequencies and notes 
+    '''
     frequencies = list(df.sort_index()[0])
     notes = list(df.sort_values(by=0,ascending=False).rename(columns={0:'Notes'})[:7].index)
     return [frequencies, notes]
 
 
 def make_features(indir=None,outdir=None):
+    '''
+    Driver function for creating the features
+    Takes in cleaned and chunked data
+    Gets the top 7 notes, their frequencies, and adds them as columns to df
+    '''
     df = pd.read_pickle(indir+'/cleaned_data.pkl')
     freq_and_notes = average_dist(df)
     df['frequencies'] = freq_and_notes[0]
     df['scale'] = freq_and_notes[1]
 
+    #creation of the output folder 
     if outdir and not os.path.exists(outdir):
         os.makedirs(outdir)
    

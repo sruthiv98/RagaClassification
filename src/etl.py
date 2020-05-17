@@ -1,3 +1,4 @@
+#import packages and dependencies
 import numpy as np
 import librosa, librosa.display
 import matplotlib.pyplot as plt
@@ -7,7 +8,12 @@ from scipy.stats import mode
 import json
 
 
-def load(indir=None,outdir=None): 
+def load(indir=None,outdir=None):
+    '''
+    Loads data from indir with Librosa
+    Organizes it into a dataframe
+    Outputs dataframe to a pkl file
+    '''
     songs = os.listdir(indir)
     y_array = []
     sr_array = []
@@ -15,7 +21,7 @@ def load(indir=None,outdir=None):
     for i in songs:
         if '.DS_Store' in i: 
             continue
-        y, sr = librosa.load(indir+'/'+ i)
+        y, sr = librosa.load(indir+'/'+ i) #load song 
         y_array.append(y)
         sr_array.append(sr)
         song_name.append(i)
@@ -32,6 +38,11 @@ def load(indir=None,outdir=None):
 
 
 def clean_data(indir = None, outdir = None):
+    '''
+    Takes the loaded data, converts pitch into C, and
+    chunks the clips into subclips
+    Outputs a pkl file with dataframe of cleaned and chunked data 
+    '''
 
     if outdir and not os.path.exists(outdir):
         os.makedirs(outdir)
@@ -64,7 +75,7 @@ def clean_data(indir = None, outdir = None):
         y = ys[i]
         sr = srs[i]
         
-        #check pitch of each input        
+        #check pitch of each input, convert it to C if it's not      
         pitch = pitchdict[audio[i][:-4]]
         
         if pitch == 'C':
@@ -94,7 +105,8 @@ def clean_data(indir = None, outdir = None):
         
         y = newy
         ylist = []
-    
+
+        #chunk the data to create smaller subclips
         first = 0
         second = 100000
         while second < len(y):
@@ -105,7 +117,7 @@ def clean_data(indir = None, outdir = None):
         cliptitles = []
         
         for j in range(len(ylist)):
-            string = audio[i][:-6]
+            string = audio[i][:-6] #clean string to show raga only 
             cliptitles.append(string)
             
         for k in range(len(cliptitles)):
@@ -115,10 +127,12 @@ def clean_data(indir = None, outdir = None):
             dfdict['sr'].append(sr)
             
     cleaned = pd.DataFrame(dfdict)
-    
+
+    #create output directory
     if outdir and not os.path.exists(outdir):
         os.makedirs(outdir)
-   
+
+    #output cleaned file
     cleaned.to_pickle(os.path.join(outdir,'cleaned_data.pkl'))
     
     return cleaned
