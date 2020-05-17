@@ -2,7 +2,7 @@
 import os
 import pandas as pd
 from joblib import dump
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
 import time
 from sklearn.naive_bayes import GaussianNB
 from sklearn import metrics
@@ -77,7 +77,10 @@ def train_model(X, y, outdir=None):
     #creates directory & dumps model 
     if outdir:
         t = int(time.time())
-        joblib.dump(model, os.path.join(outdir, 'naivebayes-model-%d.joblib' % t))
+        
+        dump(model, os.path.join(outdir, 'naivebayes-model-%d.joblib' % t))
+
+        #joblib.dump(model, os.path.join(outdir, 'naivebayes-model-%d.joblib' % t))
 
     return model
 

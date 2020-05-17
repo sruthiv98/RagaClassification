@@ -45,7 +45,7 @@ def main(targets):
         clean_data(**cfg)
 
     # make the test target
-    if 'test' in targets:
+    if 'test-project' in targets:
         cfg = load_params(TEST_DATA_PARAMS)
         load(**cfg)
 
@@ -55,12 +55,13 @@ def main(targets):
         cfg = load_params(TEST_FEATURE_PARAMS)
         make_features(**cfg)
 
-    if 'model' in targets:
-        print('about to load model')
         cfg = load_params(TEST_MODEL_PARAMS)
-        print('model loded')
         driver(**cfg)
-        print('done')
+
+    # if data is cleaned and just model pipeline is to be run
+    if 'model' in targets:
+        cfg = load_params(TEST_MODEL_PARAMS)
+        driver(**cfg)
 
     return
 
