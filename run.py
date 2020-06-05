@@ -21,9 +21,9 @@ TEST_MODEL_PARAMS = 'config/test-04-model.json'
 
 
 def load_params(fp):
-'''
-Loads parameters. 
-'''
+    '''
+    Loads parameters.
+    '''
     with open(fp) as fh:
         param = json.load(fh)
 
