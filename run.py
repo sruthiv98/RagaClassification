@@ -21,6 +21,9 @@ TEST_MODEL_PARAMS = 'config/test-04-model.json'
 
 
 def load_params(fp):
+'''
+Loads parameters. 
+'''
     with open(fp) as fh:
         param = json.load(fh)
 
@@ -28,6 +31,9 @@ def load_params(fp):
 
 
 def main(targets):
+    '''
+    Reads targets and executes appropriate files for given data. 
+    '''
 
     # make the clean target
     if 'clean' in targets:
@@ -57,6 +63,21 @@ def main(targets):
 
         cfg = load_params(TEST_MODEL_PARAMS)
         driver(**cfg)
+
+    # make the full data target
+    if 'full-project' in targets:
+        cfg = load_params(DATA_PARAMS)
+        load(**cfg)
+
+        cfg = load_params(CLEAN_PARAMS)
+        clean_data(**cfg)
+
+        cfg = load_params(FEATURE_PARAMS)
+        make_features(**cfg)
+
+        cfg = load_params(MODEL_PARAMS)
+        driver(**cfg)
+
 
     # if data is cleaned and just model pipeline is to be run
     if 'model' in targets:
